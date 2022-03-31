@@ -115,7 +115,8 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
                               deff=deff,...)
                         }
                       })
-      rval<-t(sapply(results, unwrap,nvartype=nvartype))
+      
+      rval<-as.matrix(dplyr::bind_rows(lapply(results, unwrap, nvartype=nvartype)))
       if ((covmat && inherits(design, "svyrep.design")) || return.replicates) {
           replicates<-do.call(cbind,lapply(results,"[[","replicates"))
           attr(replicates,"scale")<-design$scale
@@ -135,7 +136,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
         }
       }      
     } else {
-      rval<-sapply(uniques,
+      results<-lapply(uniques,
                    function(i) {
                      if(verbose) print(as.character(byfactor[i]))
                      if (inherits(formula,"formula"))
@@ -146,7 +147,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
                                  design[byfactor %in% byfactor[i],],
                                  deff=deff,...))}
                    )
-      if (is.matrix(rval)) rval<-t(rval)
+      rval<-as.matrix(dplyr::bind_rows(results))
   }
 
   nr<-NCOL(rval)
