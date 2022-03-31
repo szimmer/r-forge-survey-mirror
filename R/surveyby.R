@@ -344,7 +344,7 @@ svyby.survey.design2<-function(formula, by, design, FUN,..., deff=FALSE, keep.va
               attr(r,"index")<-idx
               r
           })
-      rval<-t(sapply(results, unwrap,nvartype=nvartype))
+      rval<-as.matrix(dplyr::bind_rows(lapply(results, unwrap, nvartype=nvartype)))
       if (covmat || influence) {
           ## do the influence function thing here
           infs<-lapply(results,attr, "influence")
@@ -373,7 +373,7 @@ svyby.survey.design2<-function(formula, by, design, FUN,..., deff=FALSE, keep.va
       }      
     } else {
 
-      rval<-sapply(uniques,
+      results<-lapply(uniques,
                    function(i) {
                      if(verbose) print(as.character(byfactor[i]))
                      if (inherits(formula,"formula"))
@@ -384,7 +384,7 @@ svyby.survey.design2<-function(formula, by, design, FUN,..., deff=FALSE, keep.va
                                  design[byfactor %in% byfactor[i],],
                                  deff=deff,...))}
                    )
-      if (is.matrix(rval)) rval<-t(rval)
+      rval<-as.matrix(dplyr::bind_rows(results))
   }
 
   nr<-NCOL(rval)
